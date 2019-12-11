@@ -4,7 +4,6 @@ from django.db import models
 class ComplaintState(models.Model):
     """This a model class which represents a complaint state"""
 
-    DEFAULT_STATE_ID = 1
     name = models.CharField(max_length=100, null=False, blank=False)
 
     def __str__(self):
@@ -32,10 +31,10 @@ class SubdivisionReponsible(models.Model):
 class Complaint(models.Model):
     """This a model class which represents a general complaint"""
 
-    #TODO title field
+    title = models.CharField(max_length=100, null=False, blank=False)
     folio = models.BigIntegerField(null=True, blank=True)
     compliant_state = models.ForeignKey('ComplaintState',
-                                        default=ComplaintState.DEFAULT_STATE_ID,
+                                        null=True,
                                         on_delete=models.CASCADE)
     complaint_content = models.TextField(null=False, blank=False)
 

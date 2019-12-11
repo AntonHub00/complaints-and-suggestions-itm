@@ -97,7 +97,12 @@ class ComplaintGetAllOrCreateOfOneType(APIView):
                              ' are available in the url'},
                             status=status.HTTP_404_NOT_FOUND)
 
+
+        default_compliant_state = ComplaintState.objects.all().first()
+
         general_complaint = Complaint.objects.create(
+            title=request.data['title'],
+            compliant_state=default_compliant_state,
             name=request.data['name'],
             email=request.data['email'],
             phone=request.data['phone'],
@@ -105,32 +110,51 @@ class ComplaintGetAllOrCreateOfOneType(APIView):
         )
 
         if complaint_type == 'student':
-            student_complaint.create(
-                complaint=general_complaint,
-                control_number=request.data['control_number'],
-                career=request.data['career'],
-                semester=request.data['semester'],
-                group=request.data['group'],
-                turn=request.data['turn'],
-                classroom=request.data['classroom']
-            )
+            try:
+                student_complaint = StudentComplaint.objects.create(
+                    complaint=general_complaint,
+                    control_number=request.data['control_number'],
+                    career=request.data['career'],
+                    semester=request.data['semester'],
+                    group=request.data['group'],
+                    turn=request.data['turn'],
+                    classroom=request.data['classroom']
+                )
+            except Exception as e:
+                print(e)
+                general_complaint.delete()
+                return Response({'error' : 'Student complaint could not be'
+                                 ' created'}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({'succes' : 'Student complaint created succesfully'})
         elif complaint_type == 'staff':
-            staff_complaint = StaffComplaint.objects.create(
-                complaint=general_complaint,
-                rfc=request.data['rfc'],
-                department=request.data['department']
-            )
+            try:
+                staff_complaint = StaffComplaint.objects.create(
+                    complaint=general_complaint,
+                    rfc=request.data['rfc'],
+                    department=request.data['department']
+                )
+            except Exception as e:
+                print(e)
+                general_complaint.delete()
+                return Response({'error' : 'Staff complaint could not be'
+                                 ' created'}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({'succes' : 'Staff complaint created succesfully'})
         else:
-            external_related_complaint = ExternalRelatedComplaint.objects.create(
-                complaint=general_complaint,
-                relation=request.data['relation']
-            )
+            try:
+                external_related_complaint = ExternalRelatedComplaint.objects.create(
+                    complaint=general_complaint,
+                    relation=request.data['relation']
+                )
+            except Exception as e:
+                print(e)
+                general_complaint.delete()
+                return Response({'error' : 'External related complaint could'
+                                 ' not be created'}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({'succes' : 'Staff complaint created succesfully'})
+            return Response({'succes' : 'External related complaint created'
+                             ' succesfully'})
 
 
 class ComplaintGetAllOfOneType(APIView):
@@ -172,7 +196,7 @@ class ComplaintRaw(APIView):
         general_complaint = get_object_or_404(Complaint, pk=pk)
 
         if 'complaint_state' in request.data:
-            pass
+            general_complaint.complaint_state = request.data['complaint_state']
         elif 'opening_date' in request.data:
             pass
         elif 'strategic_process' in request.data:
