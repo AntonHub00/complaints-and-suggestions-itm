@@ -112,11 +112,11 @@ class ComplaintGetAllOrCreateOfOneType(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-        default_compliant_state = ComplaintState.objects.all().first()
+        default_complaint_state = ComplaintState.objects.all().first()
 
         general_complaint = Complaint.objects.create(
             title=request.data['title'],
-            compliant_state=default_compliant_state,
+            complaint_state=default_complaint_state,
             name=request.data['name'],
             email=request.data['email'],
             phone=request.data['phone'],
