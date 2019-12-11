@@ -17,6 +17,8 @@ from api.serializers import (
     ExternalRelatedComplaintSerializer
 )
 
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
@@ -25,6 +27,18 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
+
+
+def calculate_tlp_date(given_date_string):
+    days_to_add = 7
+    given_date = datetime.strptime(given_date_string, '%Y-%m-%d').date()
+
+    while days_to_add > 0:
+        given_date += timedelta(days=1)
+        if given_date.weekday() >= 5: # saturday = 5 and sunday = 6
+            continue
+        days_to_add -= 1
+    return given_date.strftime('%Y-%m-%d')
 
 
 def complaint_type_is_valid(complaint_type):
@@ -194,7 +208,6 @@ class ComplaintRaw(APIView):
 
     def patch(self, request, pk):
         general_complaint = get_object_or_404(Complaint, pk=pk)
-        print(general_complaint.complaint_state)
 
         updatable_fields = {'complaint_state', 'opening_date',
                             'strategic_process', 'subdivision_responsible',
@@ -226,7 +239,7 @@ class ComplaintRaw(APIView):
             general_complaint.subdivision_responsible = object
         if 'responsible_delivery_date' in request.data:
             general_complaint.responsible_delivery_date = request.data['responsible_delivery_date']
-            # Then set tlp_response_date one business week ahead
+            general_complaint.tlp_response_date = calculate_tlp_date(request.data['responsible_delivery_date'])
         if 'tr_response_date' in request.data:
             general_complaint.tr_response_date = request.data['tr_response_date']
         if 'complainer_response_date' in request.data:
