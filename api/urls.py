@@ -38,10 +38,10 @@ urlpatterns = [
          name='api-state-get-all'),
 
     # Retrieve all the fields and instances of all strategic processes
-    path('strategic_processes/', StrategicProcessGetAll.as_view(),
+    path('strategic-processes/', StrategicProcessGetAll.as_view(),
          name='api-strategic-processes-get-all'),
 
     # Retrieve all the fields and instances of all subdivision responsibles
-    path('subdivision_responsibles/', SubdivisionReponsibleGetAll.as_view(),
+    path('subdivision-responsibles/', SubdivisionReponsibleGetAll.as_view(),
          name='api-subdivision-responsibles-get-all'),
 ]

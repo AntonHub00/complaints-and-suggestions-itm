@@ -194,28 +194,45 @@ class ComplaintRaw(APIView):
 
     def patch(self, request, pk):
         general_complaint = get_object_or_404(Complaint, pk=pk)
+        print(general_complaint.complaint_state)
 
-        if 'complaint_state' in request.data:
-            general_complaint.complaint_state = request.data['complaint_state']
-        elif 'opening_date' in request.data:
-            pass
-        elif 'strategic_process' in request.data:
-            pass
-        elif 'subdivision_responsible' in request.data:
-            pass
-        elif 'responsible_delivery_date' in request.data:
-            pass
-        elif 'responsible_response_date' in request.data:
-            pass
-        elif 'complainer_response_date' in request.data:
-            pass
-        else:
+        updatable_fields = {'complaint_state', 'opening_date',
+                            'strategic_process', 'subdivision_responsible',
+                            'responsible_delivery_date', 'tr_response_date',
+                            'complainer_response_date'}
+
+        # Checks if the given key is valid
+        if not (set(request.data) <= updatable_fields):
             return Response({'error' : 'Only the following fields are available'
                              ' to be updated: complaint_state, opening_date,'
                              ' strategic_process, subdivision_responsible,'
                              ' responsible_delivery_date, responsible_response_date'
                              ' and complainer_response_date'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        if 'complaint_state' in request.data:
+            object = get_object_or_404(ComplaintState,
+                                             pk=request.data['complaint_state'])
+            general_complaint.complaint_state = object
+        if 'opening_date' in request.data:
+            general_complaint.opening_date = request.data['opening_date']
+        if 'strategic_process' in request.data:
+            object = get_object_or_404(StrategicProcess,
+                                             pk=request.data['strategic_process'])
+            general_complaint.strategic_process = object
+        if 'subdivision_responsible' in request.data:
+            object = get_object_or_404(SubdivisionReponsible,
+                                             pk=request.data['subdivision_responsible'])
+            general_complaint.subdivision_responsible = object
+        if 'responsible_delivery_date' in request.data:
+            general_complaint.responsible_delivery_date = request.data['responsible_delivery_date']
+            # Then set tlp_response_date one business week ahead
+        if 'tr_response_date' in request.data:
+            general_complaint.tr_response_date = request.data['tr_response_date']
+        if 'complainer_response_date' in request.data:
+            general_complaint.complainer_response_date = request.data['complainer_response_date']
+
+        general_complaint.save()
 
         return Response({'success' : 'Complaint updated succesfully'})
 

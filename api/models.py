@@ -33,7 +33,7 @@ class Complaint(models.Model):
 
     title = models.CharField(max_length=100, null=False, blank=False)
     folio = models.BigIntegerField(null=True, blank=True)
-    compliant_state = models.ForeignKey('ComplaintState',
+    complaint_state = models.ForeignKey('ComplaintState',
                                         null=True,
                                         on_delete=models.CASCADE)
     complaint_content = models.TextField(null=False, blank=False)
@@ -51,7 +51,8 @@ class Complaint(models.Model):
                                                 null=True, blank=True,
                                                 on_delete=models.CASCADE) # Select (3 options)
     responsible_delivery_date = models.DateField(null=True, blank=True) # Manual
-    responsible_response_date = models.DateField(null=True, blank=True) # Both manual and automatic
+    tlp_response_date = models.DateField(null=True, blank=True) # Automatic
+    tr_response_date = models.DateField(null=True, blank=True) # ManuaManual
     complainer_response_date = models.DateField(null=True, blank=True) # Manual
 
     def __str__(self):
