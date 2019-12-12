@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # External
     'rest_framework',
+    'corsheaders', # CORS
 
     # Local
     'api',
@@ -53,6 +54,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # CORS
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'c_and_s_itm.urls'
@@ -125,3 +130,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# CORS allow requests from other sites
+CORS_ORIGIN_ALLOW_ALL = True
