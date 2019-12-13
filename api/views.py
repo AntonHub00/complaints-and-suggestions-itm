@@ -21,12 +21,27 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
+
+
+def send_email():
+    email = EmailMessage(
+        subject='Nueva queja',
+        body='Se ha enviado una nueva queja',
+        from_email=settings.EMAIL_HOST_USER,
+        to=['antonhub00@gmail.com']
+    )
+
+    # email.attach('test.pdf', pdf, 'application/pdf')
+
+    email.send(fail_silently=False)
 
 
 def calculate_tlp_date(given_date_string):
@@ -254,6 +269,9 @@ class StateGetAll(APIView):
     def get(self, request):
         complaint_states = ComplaintState.objects.all()
         payload = ComplaintStateSerializer(complaint_states, many=True).data
+
+        send_email()
+
         return Response({'states' : payload})
 
 
