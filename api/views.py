@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.core.mail import EmailMessage
 from django.conf import settings
 
@@ -225,7 +225,7 @@ class ComplaintRaw(APIView):
     def patch(self, request, pk):
         general_complaint = get_object_or_404(Complaint, pk=pk)
 
-        updatable_fields = {'complaint_state', 'opening_date',
+        updatable_fields = {'folio', 'complaint_state', 'opening_date',
                             'strategic_process', 'subdivision_responsible',
                             'responsible_delivery_date', 'tr_response_date',
                             'complainer_response_date'}
@@ -233,7 +233,7 @@ class ComplaintRaw(APIView):
         # Checks if the given key is valid
         if not (set(request.data) <= updatable_fields):
             return Response({'error' : 'Only the following fields are available'
-                             ' to be updated: complaint_state, opening_date,'
+                             ' to be updated: folio, complaint_state, opening_date,'
                              ' strategic_process, subdivision_responsible,'
                              ' responsible_delivery_date, responsible_response_date'
                              ' and complainer_response_date'},
@@ -260,6 +260,8 @@ class ComplaintRaw(APIView):
             general_complaint.tr_response_date = request.data['tr_response_date']
         if 'complainer_response_date' in request.data:
             general_complaint.complainer_response_date = request.data['complainer_response_date']
+        if 'folio' in request.data:
+            general_complaint.folio = request.data['folio']
 
         general_complaint.save()
 
@@ -299,3 +301,10 @@ class AuthenticateUser(APIView):
             authenticated = True
 
         return Response({'authenticated' : authenticated})
+
+def test_template(request):
+    payload = {}
+    payload['name'] = 'Antonio'
+    payload['email'] = 'antonhub00@gmail'
+    context = {'payload' : payload}
+    return render(request, 'api/index.html', context)

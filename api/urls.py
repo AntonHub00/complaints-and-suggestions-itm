@@ -9,6 +9,7 @@ from api.views import (
     StrategicProcessGetAll,
     SubdivisionReponsibleGetAll,
     AuthenticateUser,
+    test_template,
 )
 
 urlpatterns = [
@@ -49,4 +50,8 @@ urlpatterns = [
     # Retrieves true if the username and password are correct, otherwise false
     path('authenticate-user/', AuthenticateUser.as_view(),
          name='api-authenticate-user'),
+
+    # Testing rendering a template
+    path('test-template/', test_template,
+         name='api-test-template'),
 ]
