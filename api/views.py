@@ -20,6 +20,7 @@ from api.serializers import (
 from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -285,3 +286,16 @@ class SubdivisionReponsibleGetAll(APIView):
         subdivision_responsibles = SubdivisionReponsible.objects.all()
         payload = SubdivisionReponsibleSerializer(subdivision_responsibles, many=True).data
         return Response({'subdivision_responsibles' : payload})
+
+class AuthenticateUser(APIView):
+    def post(self, request):
+        username = request.data['username']
+        password = request.data['password']
+        authenticated = False
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+            authenticated = True
+
+        return Response({'authenticated' : authenticated})
