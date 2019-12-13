@@ -270,8 +270,6 @@ class StateGetAll(APIView):
         complaint_states = ComplaintState.objects.all()
         payload = ComplaintStateSerializer(complaint_states, many=True).data
 
-        send_email()
-
         return Response({'states' : payload})
 
 
