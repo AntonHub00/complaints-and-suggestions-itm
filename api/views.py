@@ -18,6 +18,8 @@ from api.serializers import (
 )
 
 from datetime import datetime, timedelta
+from io import BytesIO
+from django.template.loader import get_template
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -31,8 +33,16 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 
+from xhtml2pdf import pisa
 
-def send_email():
+
+def convert_template_and_send_email(payload):
+    template = get_template('api/index.html')
+    html  = template.render({'payload' : payload})
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode('ISO-8859-1')), result)
+
+
     email = EmailMessage(
         subject='Nueva queja',
         body='Se ha enviado una nueva queja',
@@ -40,7 +50,7 @@ def send_email():
         to=['antonhub00@gmail.com']
     )
 
-    # email.attach('test.pdf', pdf, 'application/pdf')
+    email.attach('queja.pdf', result.getvalue(), 'application/pdf')
 
     email.send(fail_silently=False)
 
@@ -141,6 +151,7 @@ class ComplaintGetAllOrCreateOfOneType(APIView):
 
         if complaint_type == 'student':
             try:
+                pass
                 student_complaint = StudentComplaint.objects.create(
                     complaint=general_complaint,
                     control_number=request.data['control_number'],
@@ -156,7 +167,13 @@ class ComplaintGetAllOrCreateOfOneType(APIView):
                 return Response({'error' : 'Student complaint could not be'
                                  ' created'}, status=status.HTTP_400_BAD_REQUEST)
 
+            request.data._mutable = True
+            request.data['date'] = general_complaint.received_date.strftime('%d/%m/%Y')
+
+            convert_template_and_send_email(request.data)
+
             return Response({'succes' : 'Student complaint created succesfully'})
+            # return render(request, 'api/index.html', context= {'payload' : request.data})
         elif complaint_type == 'staff':
             try:
                 staff_complaint = StaffComplaint.objects.create(
@@ -301,10 +318,3 @@ class AuthenticateUser(APIView):
             authenticated = True
 
         return Response({'authenticated' : authenticated})
-
-def test_template(request):
-    payload = {}
-    payload['name'] = 'Antonio'
-    payload['email'] = 'antonhub00@gmail'
-    context = {'payload' : payload}
-    return render(request, 'api/index.html', context)
