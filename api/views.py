@@ -40,7 +40,7 @@ def convert_template_and_send_email(payload):
     template = get_template('api/index.html')
     html  = template.render({'payload' : payload})
     result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode('ISO-8859-1')), result)
+    pdf = pisa.pisaDocument(BytesIO(html.encode('UTF-8')), result)
 
 
     email = EmailMessage(
